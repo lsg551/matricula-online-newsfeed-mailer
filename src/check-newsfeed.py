@@ -227,7 +227,7 @@ def parse_args() -> Options:
 
     if args.verbose:
         logger.addHandler(logging.StreamHandler())
-        logger.warn(
+        logger.warning(
             (
                 "Verbose mode enabled. Logging to stdout too. Some log messages might be omitted."
                 f"Check the log file for full details: {LOG_FILE.absolute()}"
