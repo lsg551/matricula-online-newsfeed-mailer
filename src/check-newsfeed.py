@@ -52,7 +52,10 @@ MAJOR_VERSION = VERSION.split(".")[0]
 JOB_ID = uuid.uuid4()
 JOB_START = datetime.now()
 
-APP_DIR = Path("~/.matricula-online-scraper/").expanduser().absolute()
+# APP_DIR = Path("~/.matricula-online-scraper/").expanduser().absolute()
+data_dir = os.getenv("DATA_DIR")
+assert data_dir, "DATA_DIR environment variable not set"
+APP_DIR = Path(data_dir).resolve()
 LOG_FILE = Path(APP_DIR, f"matricula-newsfeed-mailer.v{MAJOR_VERSION}.log")
 DATA_STORE = Path(APP_DIR, "scraper-data")  # folder where scraped data is stored
 DATA_FILE = Path(DATA_STORE, f"job_{JOB_ID}_v{VERSION.replace(".", "_")}.csv")
