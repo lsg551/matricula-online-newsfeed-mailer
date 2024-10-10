@@ -289,6 +289,9 @@ def is_eq_newsfeed_article(a: NewsfeedArticle, b: NewsfeedArticle) -> bool:
 def fetch_newsfeed(*, last_n_days: int) -> Path:
     """Fetches the last n days and returns the path to the scraped data."""
     filename = DATA_FILE.with_suffix("")  # remove '.csv' suffix
+
+    assert EXECUTABLE, "Executable not found."
+
     call_args: list[str] = [
         EXECUTABLE,
         "fetch",
