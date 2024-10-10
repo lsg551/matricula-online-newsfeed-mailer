@@ -440,7 +440,7 @@ def get_history(*, limit: int = 10) -> tuple[list[Job], int, Path | None]:
     data_files = data_files[:limit]
     last_data_file = data_files[0] if data_files else None
 
-    jobs = []
+    jobs: list[Job] = []
     for file in data_files:
         matches = parse_data_file(file)
         creation_date = datetime.fromtimestamp(os.path.getmtime(file))
