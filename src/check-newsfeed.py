@@ -46,7 +46,7 @@ import os
 # please update the version according to semver for user feature semantics
 # strictly follow the breaking change rules: bump major version
 # otherwise unexpected behaviour may occur
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 MAJOR_VERSION = VERSION.split(".")[0]
 
 JOB_ID = uuid.uuid4()
@@ -319,6 +319,11 @@ def parse_article_date_str(value: str) -> date:
     # if used write_back_history, then the date was already parsed
     if "-" in value:
         return datetime.strptime(value, "%Y-%m-%d").date()
+
+    # BUG: matricula uses inconsistent date formatting in the english version
+    # this is a quick fix
+    if "Sept." in value:
+        value = value.replace("Sept.", "Sep.")
 
     # format from Matricula
     return (
