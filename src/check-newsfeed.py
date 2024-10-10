@@ -369,7 +369,7 @@ def find(
     *, keywords: list[str], in_articles: list[NewsfeedArticle]
 ) -> list[NewsfeedArticle]:
     """Searches for substrings of `keywords` in article headlines and previews."""
-    matches = []
+    matches: list[NewsfeedArticle] = []
     for article in in_articles:
         for keyword in keywords:
             if (
