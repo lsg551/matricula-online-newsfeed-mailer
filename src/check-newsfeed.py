@@ -72,7 +72,7 @@ if not APP_DIR.exists():
 
 
 logger = logging.getLogger(__name__)
-logger_extra = {
+logger_extra = {  # type: ignore
     "job_id": JOB_ID,
     "bot_version": VERSION,
 }
@@ -88,14 +88,14 @@ logging.basicConfig(
 logger_factory = logging.getLogRecordFactory()
 
 
-def record_factory(*args, **kwargs):
+def record_factory(*args, **kwargs):  # type: ignore
     record = logger_factory(*args, **kwargs)
     record.job_id = JOB_ID
     record.bot_version = VERSION
     return record
 
 
-logging.setLogRecordFactory(record_factory)
+logging.setLogRecordFactory(record_factory)  # type: ignore
 
 
 class LogLine(TypedDict):
