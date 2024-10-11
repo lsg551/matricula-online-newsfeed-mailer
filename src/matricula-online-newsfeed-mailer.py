@@ -46,13 +46,16 @@ import os
 # please update the version according to semver for user feature semantics
 # strictly follow the breaking change rules: bump major version
 # otherwise unexpected behaviour may occur
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 MAJOR_VERSION = VERSION.split(".")[0]
 
 JOB_ID = uuid.uuid4()
 JOB_START = datetime.now()
 
-APP_DIR = Path("~/.matricula-online-scraper/").expanduser().absolute()
+data_dir = os.getenv("DATA_DIR")
+if not data_dir:
+    raise Exception("DATA_DIR environment variable not set.")
+APP_DIR = Path(data_dir).resolve()
 LOG_FILE = Path(APP_DIR, f"matricula-newsfeed-mailer.v{MAJOR_VERSION}.log")
 DATA_STORE = Path(APP_DIR, "scraper-data")  # folder where scraped data is stored
 DATA_FILE = Path(DATA_STORE, f"job_{JOB_ID}_v{VERSION.replace(".", "_")}.csv")
@@ -69,7 +72,7 @@ if not APP_DIR.exists():
 
 
 logger = logging.getLogger(__name__)
-logger_extra = {
+logger_extra = {  # type: ignore
     "job_id": JOB_ID,
     "bot_version": VERSION,
 }
@@ -85,14 +88,14 @@ logging.basicConfig(
 logger_factory = logging.getLogRecordFactory()
 
 
-def record_factory(*args, **kwargs):
+def record_factory(*args, **kwargs):  # type: ignore
     record = logger_factory(*args, **kwargs)
     record.job_id = JOB_ID
     record.bot_version = VERSION
     return record
 
 
-logging.setLogRecordFactory(record_factory)
+logging.setLogRecordFactory(record_factory)  # type: ignore
 
 
 class LogLine(TypedDict):
@@ -224,7 +227,7 @@ def parse_args() -> Options:
 
     if args.verbose:
         logger.addHandler(logging.StreamHandler())
-        logger.warn(
+        logger.warning(
             (
                 "Verbose mode enabled. Logging to stdout too. Some log messages might be omitted."
                 f"Check the log file for full details: {LOG_FILE.absolute()}"
@@ -253,7 +256,6 @@ EXECUTABLE = shutil.which("matricula-online-scraper")
 if not EXECUTABLE:
     logger.error("Could not find executable 'matricula-online-scraper'.")
     exit(1)
-
 
 SCRAPER_VERSION = (
     subprocess.run([EXECUTABLE, "--version"], encoding="utf-8", capture_output=True)
@@ -286,8 +288,9 @@ def is_eq_newsfeed_article(a: NewsfeedArticle, b: NewsfeedArticle) -> bool:
 def fetch_newsfeed(*, last_n_days: int) -> Path:
     """Fetches the last n days and returns the path to the scraped data."""
     filename = DATA_FILE.with_suffix("")  # remove '.csv' suffix
+
     call_args: list[str] = [
-        EXECUTABLE,
+        EXECUTABLE,  # type: ignore
         "fetch",
         "newsfeed",
         str(filename.absolute()),
@@ -319,6 +322,11 @@ def parse_article_date_str(value: str) -> date:
     # if used write_back_history, then the date was already parsed
     if "-" in value:
         return datetime.strptime(value, "%Y-%m-%d").date()
+
+    # BUG: matricula uses inconsistent date formatting in the english version
+    # this is a quick fix
+    if "Sept." in value:
+        value = value.replace("Sept.", "Sep.")
 
     # format from Matricula
     return (
@@ -358,7 +366,7 @@ def find(
     *, keywords: list[str], in_articles: list[NewsfeedArticle]
 ) -> list[NewsfeedArticle]:
     """Searches for substrings of `keywords` in article headlines and previews."""
-    matches = []
+    matches: list[NewsfeedArticle] = []
     for article in in_articles:
         for keyword in keywords:
             if (
@@ -429,7 +437,7 @@ def get_history(*, limit: int = 10) -> tuple[list[Job], int, Path | None]:
     data_files = data_files[:limit]
     last_data_file = data_files[0] if data_files else None
 
-    jobs = []
+    jobs: list[Job] = []
     for file in data_files:
         matches = parse_data_file(file)
         creation_date = datetime.fromtimestamp(os.path.getmtime(file))
