@@ -52,9 +52,9 @@ MAJOR_VERSION = VERSION.split(".")[0]
 JOB_ID = uuid.uuid4()
 JOB_START = datetime.now()
 
-# APP_DIR = Path("~/.matricula-online-scraper/").expanduser().absolute()
 data_dir = os.getenv("DATA_DIR")
-assert data_dir, "DATA_DIR environment variable not set"
+if not data_dir:
+    raise Exception("DATA_DIR environment variable not set.")
 APP_DIR = Path(data_dir).resolve()
 LOG_FILE = Path(APP_DIR, f"matricula-newsfeed-mailer.v{MAJOR_VERSION}.log")
 DATA_STORE = Path(APP_DIR, "scraper-data")  # folder where scraped data is stored
@@ -257,7 +257,6 @@ if not EXECUTABLE:
     logger.error("Could not find executable 'matricula-online-scraper'.")
     exit(1)
 
-
 SCRAPER_VERSION = (
     subprocess.run([EXECUTABLE, "--version"], encoding="utf-8", capture_output=True)
     .stdout.strip()
@@ -290,10 +289,8 @@ def fetch_newsfeed(*, last_n_days: int) -> Path:
     """Fetches the last n days and returns the path to the scraped data."""
     filename = DATA_FILE.with_suffix("")  # remove '.csv' suffix
 
-    assert EXECUTABLE, "Executable not found."
-
     call_args: list[str] = [
-        EXECUTABLE,
+        EXECUTABLE,  # type: ignore
         "fetch",
         "newsfeed",
         str(filename.absolute()),
