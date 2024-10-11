@@ -1,0 +1,16 @@
+# This service unit if for the check-newsfeed.py script.
+# See https://github.com/lsg551/matricula-online-newsfeed-mailer for more information.
+
+
+# everything here should work fine, but
+# TODO: replace <user> and insert your user
+
+[Unit]
+Description=Check Matricula Online`s newsfeed for new entries
+
+[Service]
+WorkingDirectory=/home/<user>/.matricula/
+User=<user>
+Type=oneshot
+EnvironmentFile=/home/<user>/.matricula/matricula-online-newsfeed-mailer.config.env
+ExecStart=docker run --rm -v /home/<user>/.matricula/data/:/data matricula-online-newsfeed-mailer --from $FROM --password $PASSWORD --to $TO --smtp-server $SMTP_SERVER -p $SMTP_PORT -k $KEYWORDS -n $SCRAPE_PERIOD 
